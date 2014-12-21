@@ -1,4 +1,7 @@
 
+void printAddr(uint16_t addr, uint8_t col, uint8_t row);
+void printByte(uint8_t val, uint8_t col, uint8_t row);
+
 // Implements an entire 6502 address space
 class AddressSpace {
   private:

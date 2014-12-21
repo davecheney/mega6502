@@ -20,6 +20,20 @@ LiquidCrystal lcd( 8, 9, 4, 5, 6, 7 );
 //LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 AddressSpace mem;
 
+void printAddr(uint16_t addr, uint8_t col, uint8_t row) {
+  lcd.setCursor(col, row);
+  lcd.print((addr >> 12) & 0x0f, HEX);
+  lcd.print((addr >> 8) & 0x0f, HEX);
+  lcd.print((addr >> 4) & 0x0f, HEX);
+  lcd.print(addr & 0x0f, HEX);
+}
+
+void printByte(uint8_t val, uint8_t col, uint8_t row) {
+  lcd.setCursor(col, row);
+  lcd.print((val >> 4) & 0x0f, HEX);
+  lcd.print(val & 0x0f, HEX);
+}
+
 // these constants won't change.  But you can change the size of
 // your LCD using them:
 const int numRows = 2;
@@ -81,5 +95,5 @@ void loop() {
       PORTL = 0;
       mem.Write((addrh << 8) | addrl, PINL);
   }
-  delay(50);
+  delay(100);
 }
