@@ -21,8 +21,7 @@ LiquidCrystal lcd( 8, 9, 4, 5, 6, 7 );
 byte ram[0x1000];
 byte pia[0x14];
 
-void printAddr(uint16_t addr, uint8_t col, uint8_t row) {
-
+void printAddr(const uint16_t addr, const uint8_t col, const uint8_t row) {
   lcd.setCursor(col, row);
   lcd.print((addr >> 12) & 0x0f, HEX);
   lcd.print((addr >> 8) & 0x0f, HEX);
@@ -31,8 +30,7 @@ void printAddr(uint16_t addr, uint8_t col, uint8_t row) {
 
 }
 
-void printByte(uint8_t val, uint8_t col, uint8_t row) {
-
+void printByte(const uint8_t val, const uint8_t col, const uint8_t row) {
   lcd.setCursor(col, row);
   //char buf[2];
   //sprintf(&buf, "%2x", val);
@@ -48,7 +46,10 @@ const uint8_t basic[0x2000] PROGMEM = {0x4c, 0xa5, 0xfc, 0x4c, 0xea, 0xe2, 0xcd,
 extern byte ram[];
 extern byte pia[];
 
-uint8_t memRead(uint16_t addr) {
+#define ADDR ((addrh << 8) | addrl)
+
+uint8_t memRead(const uint8_t addrh, const uint8_t addrl) {
+  const uint16_t addr = ADDR;
   uint8_t val;
   switch (addr >> 12) {
     default:
@@ -84,17 +85,10 @@ uint8_t memRead(uint16_t addr) {
       if (LCD) printAddr(addr, 8, 0);
       if (LCD) printByte(val, 14, 0);
       return val;
-    /*
-    case 0xf: 
-      printAddr(addr, 8, 0);
-      val = rom[addr & 0xff];
-      printByte(val, 14, 0);
-      return val;
-    */
   }
 }
 
-void memWrite(uint16_t addr, uint8_t val) {
+void memWrite(const uint16_t addr, const uint8_t val) {
   switch (addr >> 12) {
     default:
       // nothing in the address space ignore the write;
@@ -174,12 +168,12 @@ void loop() {
     if (PINB & _BV(PB2)) {
       // read cycle
       DDRL = 0xff;
-      PORTL = memRead((addrh << 8) | addrl);
+      PORTL = memRead(addrh, addrl);
     } else {
       // write cycle
       DDRL = 0x00;
       PORTL = 0;
-      memWrite((addrh << 8) | addrl, PINL);
+      memWrite(ADDR, PINL);
     }
   }
 }
