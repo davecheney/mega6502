@@ -4,6 +4,7 @@
 #define KBD   = 0xD010	// Keyboard I/O
 #define KBDCR = 0xD011
 
+#define LCD false // set to false to disable lcd debugging
 
 void printAddr(uint16_t addr, uint8_t col, uint8_t row);
 void printByte(uint8_t val, uint8_t col, uint8_t row);
