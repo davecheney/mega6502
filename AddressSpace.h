@@ -1,3 +1,9 @@
+#define DSP   = 0xD012	// Video I/O
+#define DSPCR = 0xD013
+
+#define KBD   = 0xD010	// Keyboard I/O
+#define KBDCR = 0xD011
+
 
 void printAddr(uint16_t addr, uint8_t col, uint8_t row);
 void printByte(uint8_t val, uint8_t col, uint8_t row);

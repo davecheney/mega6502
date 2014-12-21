@@ -48,7 +48,7 @@ uint8_t AddressSpace::Read(uint16_t addr) {
           val = pia[addr & 0xff];
       }
       printByte(val, 14, 0);
-      break;
+      return val;
     case 0xff:
       printAddr(addr, 8, 0);
       val = rom[addr & 0xff];
