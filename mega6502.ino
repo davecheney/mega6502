@@ -90,13 +90,11 @@ void loop() {
     addrh = PINC;
     sbi(PORTB, 0);
     sei();
-    switch (digitalRead(RW)) {
-      case HIGH:
+    if(PINB & _BV(PB2)) {
         // read cycle
         DDRL = 0xff;
         PORTL = mem.Read((addrh << 8) | addrl);
-        break;
-      case LOW:
+    } else {
         // write cycle
         DDRL = 0x00;
         PORTL = 0;
