@@ -7,7 +7,7 @@ Mega6502 is an experiment implementing a minimal 6502 platform using an Arduino 
 Mega6502 requires an Ardunio Mega 2560 development board and CMOS 65c02. The 65c02 should be connected to the Arduino as follows
 
 					
-                  5v      GND                                 5v   Arduino 
+		  5v      GND                                 5v   Arduino 
 		  |        |       +------\/------+           |
 		  |        +----  1| Vss     /RES |40 -- 3k3 -+--- 52
 		  +--- 3k3 -----  2| RDY       ϕ2 |39  
@@ -30,6 +30,6 @@ Mega6502 requires an Ardunio Mega 2560 development board and CMOS 65c02. The 65c
 		    35 --------- 19| A10      A12 |22 -------- 33
 		    34 --------- 20| A11      Vss |21 ---+
 		                   +--------------+      |
-                                                        GND
+		                                        GND
 
 
