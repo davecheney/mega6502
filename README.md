@@ -1,6 +1,6 @@
 # Mega6502
 
-Mega6502 is an experiment implementing a minimal 6502 platform using an Arduino and a 6502.
+Mega6502 is an experiment implementing a minimal 8 bit platform using an Arduino and a 6502.
 
 # Hardware
 
