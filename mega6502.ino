@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <avr/pgmspace.h>
 #include <LiquidCrystal.h>
+#include "woz.h"
 
 // configuration and debugging parameters
 //
@@ -8,6 +9,10 @@
 #define LCD false
 // 2400 for the authentic experience, 9600 for something more enjoyable
 #define BAUD 2400
+// these constants won't change.  But you can change the size of
+// your LCD using them:
+const int numRows = 2;
+const int numCols = 16;
 
 #define CLOCK 53
 #define RESET 52
@@ -34,7 +39,6 @@ void printAddr(const uint16_t addr, const uint8_t col, const uint8_t row) {
   lcd.write(hex[(addr >> 8) & 0x0f]);
   lcd.write(hex[(addr >> 4) & 0x0f]);
   lcd.write(hex[addr & 0x0f]);
-
 }
 
 void printByte(const uint8_t val, const uint8_t col, const uint8_t row) {
@@ -66,17 +70,17 @@ uint8_t memRead(const uint8_t addrh, const uint8_t addrl) {
       // fake 6821
       switch (addrl & 0xff) {
         case 0x10:
-          val = Serial.read() | 0x80;
+          val = 0x80 | (uint8_t)Serial.read();
           break;
         case 0x11:
-          if (Serial.available() > 0) {
+          if (Serial.available()) {
             val = 0x80;
           } else {
             val = 0x00;
           }
           break;
         default:
-          val = pia[addr & 0xff];
+          val = pia[addrl & 0xff];
       }
       if (LCD) printAddr(addr, 8, 0);
       if (LCD) printByte(val, 14, 0);
@@ -118,11 +122,6 @@ void memWrite(const uint8_t addrh, const uint8_t addrl, const uint8_t val) {
   }
 }
 
-// these constants won't change.  But you can change the size of
-// your LCD using them:
-const int numRows = 2;
-const int numCols = 16;
-
 void setup() {
   // set up the LCD's number of columns and rows:
   if (LCD)
@@ -160,13 +159,10 @@ void setup() {
 
 void loop() {
   while (true) {
-    uint8_t addrl, addrh;
     cli();
     cbi(PORTB, 0);
     __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t"); // 4 * 62.5ns delay @ 16mhz
     __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t");
-    //addrl = PINA;
-    //addrh = PINC;
     sbi(PORTB, 0);
     sei();
     if (PINB & _BV(PB2)) {
