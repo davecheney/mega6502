@@ -54,7 +54,9 @@ extern byte pia[];
 
 #define ADDR ((addrh << 8) | addrl)
 
-uint8_t memRead(const uint8_t addrh, const uint8_t addrl) {
+static uint8_t memRead() {
+  const uint8_t addrh = PINC;
+  const uint8_t addrl = PINA;
   const uint16_t addr = ADDR;
   uint8_t val;
   switch (addr >> 12) {
@@ -68,7 +70,7 @@ uint8_t memRead(const uint8_t addrh, const uint8_t addrl) {
       return val;
     case 0xd:
       // fake 6821
-      switch (addrl & 0xff) {
+      switch (addrl) {
         case 0x10:
           val = 0x80 | (uint8_t)Serial.read();
           break;
@@ -80,7 +82,7 @@ uint8_t memRead(const uint8_t addrh, const uint8_t addrl) {
           }
           break;
         default:
-          val = pia[addrl & 0xff];
+          val = pia[addrl];
       }
       if (LCD) printAddr(addr, 8, 0);
       if (LCD) printByte(val, 14, 0);
@@ -94,8 +96,11 @@ uint8_t memRead(const uint8_t addrh, const uint8_t addrl) {
   }
 }
 
-void memWrite(const uint8_t addrh, const uint8_t addrl, const uint8_t val) {
+static void memWrite() {
+  const uint8_t addrh = PINC;
+  const uint8_t addrl = PINA;
   const uint16_t addr = ADDR;
+  const uint8_t val = PINL;
   switch (addr >> 12) {
     default:
       // nothing in the address space ignore the write;
@@ -108,7 +113,7 @@ void memWrite(const uint8_t addrh, const uint8_t addrl, const uint8_t val) {
     case 0xd:
       if (LCD) printAddr(addr, 8, 1);
       if (LCD) printByte(val, 14, 1);
-      switch (addr & 0xff) {
+      switch (addrl) {
         default:
           pia[addr & 0xff] = val;
           break;
@@ -162,18 +167,17 @@ void loop() {
     cli();
     cbi(PORTB, 0);
     __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t"); // 4 * 62.5ns delay @ 16mhz
-    __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t");
     sbi(PORTB, 0);
     sei();
     if (PINB & _BV(PB2)) {
       // read cycle
       DDRL = 0xff;
-      PORTL = memRead(PINC, PINA);
+      PORTL = memRead();
     } else {
       // write cycle
       DDRL = 0x00;
       PORTL = 0;
-      memWrite(PINC, PINA, PINL);
+      memWrite();
     }
   }
 }
