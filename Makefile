@@ -1,6 +1,6 @@
 MCU = atmega1284p
 
-CFLAGS = -Os -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -Wextra -Wall -Werror -std=gnu99 -DF_CPU=16000000UL
+CFLAGS = -Os -funsigned-char -fno-exceptions -funsigned-bitfields -fpack-struct -fshort-enums -Wextra -Wall -Werror -std=gnu99 -DF_CPU=16000000UL
 
 PROGRAMMER = arduino
 
