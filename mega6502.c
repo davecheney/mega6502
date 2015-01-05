@@ -13,78 +13,60 @@ uint8_t ram[0x2000];
 
 #define ADDR (((uint16_t)PINB << 8) | (uint16_t)PINA)
 
-static uint8_t memRead() {
-  uint8_t val;
+static void memRead() {
+  DDRC = 0xff;
   switch (PINB >> 4) {
   default:
     // nothing in the address space, just return zero.
-    return 0x00;
+    PORTC = 0x00;
+    break;
   case 0x0:
-    val = ram[ADDR];
+    PORTC = ram[ADDR];
 #ifdef DEBUG
     printf("memRead: %04x: %02x\r", ADDR, val);
 #endif
-    return val;
+    break;
   case 0xd:
     // fake 6821
     switch (PINA) {
     case 0x10:
-      val = 0x80 | UDR0;
+      PORTC = 0x80 | UDR0;
       break;
     case 0x11:
-      val = UCSR0A & _BV(RXC0);
+      PORTC = UCSR0A & _BV(RXC0);
       break;
     case 0x12:
-      val = UCSR0A & _BV(UDRE0) ? 0x00 : 0xFF;
+      PORTC = UCSR0A & _BV(UDRE0) ? 0x00 : 0xFF;
       break;
     default:
 #ifdef DEBUG
       printf("pia: invalid read at %04x\n", ADDR);
 #endif
-      val = 0;
-      break;
+      PORTC = 0;
     }
-    return val;
+    break;
   case 0xe:
-    val = pgm_read_byte(erom + (ADDR - 0xe000));
-    return val;
+    PORTC = pgm_read_byte(erom + (ADDR - 0xe000));
+    break;
   case 0xf:
-    val = pgm_read_byte(from + (ADDR - 0xf000));
-    return val;
+    PORTC = pgm_read_byte(from + (ADDR - 0xf000));
+    break;
   }
-  return 0x00;
 }
 
 static void memWrite() {
-  const uint16_t addr = (((uint16_t)PINB << 8) | (uint16_t)PINA);
-  const uint8_t val = PINC;
-  switch (PINB >> 4) {
-  default:
-    // nothing in the address space ignore the write;
-    break;
-  case 0x0:
-    ram[addr] = val;
+  DDRC = 0x00;
+  PORTC = 0;
+  const uint8_t addrh = PINB;
+  if (PINB == 0xd0) {
+    if (PINA == 0x12)
+      putchar(PINC & 0x7f);
+  } else {
+    const uint16_t addr = (((uint16_t)addrh << 8) | (uint16_t)PINA);
+    ram[addr] = PINC;
 #ifdef DEBUG
-    printf("memWrite: %04x: %02x\r", addr, val);
+    printf("memWrite: %04x: %02x\r", addr, PINC);
 #endif
-    break;
-  case 0xd:
-    switch (PINA) {
-    default:
-#ifdef DEBUG
-      printf("pia: invalid write at %04x: %02x\n", addr, val);
-#endif
-      break;
-    case 0x12:
-      putchar(val & 0x7f);
-      break;
-    case 0x11:
-    // ignore write to $D011, PIA is not configurable.
-    case 0x13:
-      // ignore write to $D013, PIA is not configurable.
-      break;
-    }
-    break;
   }
 }
 
@@ -182,14 +164,9 @@ void loop() {
             "nop\n\t"
             "nop\n\t"
             "nop\n\t"); // 4 * 62.5ns delay @ 16mhz
-    if (bit_is_set(PIND,RW)) {
-      // read cycle
-      DDRC = 0xff;
-      PORTC = memRead();
+    if (bit_is_set(PIND, RW)) {
+      memRead();
     } else {
-      // write cycle
-      DDRC = 0x00;
-      PORTC = 0;
       memWrite();
     }
 #ifdef DEBUG
