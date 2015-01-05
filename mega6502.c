@@ -11,19 +11,18 @@ uint8_t ram[0x2000];
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 
-#define ADDR (((uint16_t)addrh << 8) | (uint16_t)addrl)
+#define ADDR (((uint16_t)PINB << 8) | (uint16_t)PINA)
 
 static uint8_t memRead() {
-  const uint16_t addr = (((uint16_t)PINB << 8) | (uint16_t)PINA);
   uint8_t val;
   switch (PINB >> 4) {
   default:
     // nothing in the address space, just return zero.
     return 0x00;
   case 0x0:
-    val = ram[addr];
+    val = ram[ADDR];
 #ifdef DEBUG
-    printf("memRead: %04x: %02x\r", addr, val);
+    printf("memRead: %04x: %02x\r", ADDR, val);
 #endif
     return val;
   case 0xd:
@@ -40,17 +39,17 @@ static uint8_t memRead() {
       break;
     default:
 #ifdef DEBUG
-      printf("pia: invalid read at %04x\n", addr);
+      printf("pia: invalid read at %04x\n", ADDR);
 #endif
       val = 0;
       break;
     }
     return val;
   case 0xe:
-    val = pgm_read_byte(erom + (addr - 0xe000));
+    val = pgm_read_byte(erom + (ADDR - 0xe000));
     return val;
   case 0xf:
-    val = pgm_read_byte(from + (addr - 0xf000));
+    val = pgm_read_byte(from + (ADDR - 0xf000));
     return val;
   }
   return 0x00;
@@ -112,6 +111,8 @@ void setup() {
 
   // setup service ports
   DDRD |= _BV(CLOCK) | _BV(RESET);
+  cbi(DDRD, RW);
+  cbi(PORTD, RW);
   sbi(PORTD, RESET);
 
   // send reset pulse
