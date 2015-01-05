@@ -11,46 +11,46 @@ uint8_t ram[0x2000];
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 
-#define ADDR (((uint16_t)PINB << 8) | (uint16_t)PINA)
+#define ADDR (((uint16_t)addrh << 8) | (uint16_t)PINA)
 
 static void memRead() {
   DDRC = 0xff;
-  switch (PINB >> 4) {
-  default:
-    // nothing in the address space, just return zero.
-    PORTC = 0x00;
-    break;
-  case 0x0:
-    PORTC = ram[ADDR];
+  const uint8_t addrh = PINB;
+  if (addrh & 0x80) {
+    switch (addrh >> 4) {
+    case 0xd:
+      // fake 6821
+      switch (PINA) {
+      case 0x10:
+        PORTC = 0x80 | UDR0;
+        break;
+      case 0x11:
+        PORTC = UCSR0A & _BV(RXC0);
+        break;
+      case 0x12:
+        PORTC = UCSR0A & _BV(UDRE0) ? 0x00 : 0xFF;
+        break;
+      default:
+#ifdef DEBUG
+        printf("pia: invalid read at %04x\n", ADDR);
+#endif
+        PORTC = 0;
+      }
+      break;
+    case 0xe:
+      PORTC = pgm_read_byte(
+          erom + ((((uint16_t)addrh << 8) | (uint16_t)PINA) - 0xe000));
+      break;
+    case 0xf:
+      PORTC = pgm_read_byte(
+          from + ((((uint16_t)addrh << 8) | (uint16_t)PINA) - 0xf000));
+      break;
+    }
+  } else {
+    PORTC = ram[(((uint16_t)addrh << 8) | (uint16_t)PINA)];
 #ifdef DEBUG
     printf("memRead: %04x: %02x\r", ADDR, val);
 #endif
-    break;
-  case 0xd:
-    // fake 6821
-    switch (PINA) {
-    case 0x10:
-      PORTC = 0x80 | UDR0;
-      break;
-    case 0x11:
-      PORTC = UCSR0A & _BV(RXC0);
-      break;
-    case 0x12:
-      PORTC = UCSR0A & _BV(UDRE0) ? 0x00 : 0xFF;
-      break;
-    default:
-#ifdef DEBUG
-      printf("pia: invalid read at %04x\n", ADDR);
-#endif
-      PORTC = 0;
-    }
-    break;
-  case 0xe:
-    PORTC = pgm_read_byte(erom + (ADDR - 0xe000));
-    break;
-  case 0xf:
-    PORTC = pgm_read_byte(from + (ADDR - 0xf000));
-    break;
   }
 }
 
