@@ -12,7 +12,7 @@ uint8_t ram[0x2000];
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 
-#define ADDR (((uint16_t)addrh << 8) | (uint16_t)PINA)
+#define ADDR (((uint16_t)addrh << 8) | (uint16_t)addrl)
 
 static void memRead() {
   DDRC = 0xff;
@@ -24,13 +24,13 @@ static void memRead() {
       switch (addrl) {
       case 0x10:
         PORTC = 0x80 | UDR0;
-        break;
+        return;
       case 0x11:
         PORTC = UCSR0A & _BV(RXC0);
-        break;
+        return;
       case 0x12:
-        PORTC = UCSR0A & _BV(UDRE0) ? 0x00 : 0xFF;
-        break;
+        PORTC = UCSR0A & _BV(UDRE0) ? 0x00 : 0xff;
+        return;
       default:
 #ifdef DEBUG
         printf("pia: invalid read at %04x\n", ADDR);
@@ -39,7 +39,7 @@ static void memRead() {
       }
     } else {
       PORTC = pgm_read_byte(
-          bigrom + ((((uint16_t)addrh << 8) | (uint16_t)addrl) - 0xe000));
+          bigrom + (((uint16_t)addrh << 8) | (uint16_t)addrl) - 0xe000);
     }
   } else {
     PORTC = ram[(((uint16_t)addrh << 8) | (uint16_t)addrl)];
@@ -142,24 +142,21 @@ void delay(uint16_t ms) {
 
 void loop() {
   while (1) {
+    sei();
+    // take an IRQ if necessary
     cli();
     cbi(PORTD, CLOCK);
     __asm__("nop\n\t"
             "nop\n\t"
             "nop\n\t"
             "nop\n\t"); // 4 * 62.5ns delay @ 16mhz
-    __asm__("nop\n\t"
-            "nop\n\t"
-            "nop\n\t"
-            "nop\n\t"); // 4 * 62.5ns delay @ 16mhz
     sbi(PORTD, CLOCK);
-    sei();
-    // must pause for at two clocks after raising CLOCK to allow PIND:RW to
-    // latch correctly.
-    __asm__("nop\n\t"
-            "nop\n\t"
-            "nop\n\t"
-            "nop\n\t"); // 4 * 62.5ns delay @ 16mhz
+    // must pause for at least two clocks after raising
+    // CLOCK to allow PIND:RW to latch correctly.
+    __asm__("nop\n"
+            "nop\n"
+            "nop\n"
+            "nop\n"); // 4 * 62.5ns delay @ 16mhz
     if (bit_is_set(PIND, RW)) {
       memRead();
     } else {

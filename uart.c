@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <avr/io.h>
-#define BAUD 2400
 #include <util/setbaud.h>
 
 int uart_putchar(char c, FILE *stream) {
