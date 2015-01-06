@@ -16,11 +16,12 @@ uint8_t ram[0x2000];
 static void memRead() {
   DDRC = 0xff;
   const uint8_t addrh = PINB;
+  const uint8_t addrl = PINA;
   if (addrh & 0x80) {
     switch (addrh >> 4) {
     case 0xd:
       // fake 6821
-      switch (PINA) {
+      switch (addrl) {
       case 0x10:
         PORTC = 0x80 | UDR0;
         break;
@@ -39,15 +40,15 @@ static void memRead() {
       break;
     case 0xe:
       PORTC = pgm_read_byte(
-          erom + ((((uint16_t)addrh << 8) | (uint16_t)PINA) - 0xe000));
+          erom + ((((uint16_t)addrh << 8) | (uint16_t)addrl) - 0xe000));
       break;
     case 0xf:
       PORTC = pgm_read_byte(
-          from + ((((uint16_t)addrh << 8) | (uint16_t)PINA) - 0xf000));
+          from + ((((uint16_t)addrh << 8) | (uint16_t)addrl) - 0xf000));
       break;
     }
   } else {
-    PORTC = ram[(((uint16_t)addrh << 8) | (uint16_t)PINA)];
+    PORTC = ram[(((uint16_t)addrh << 8) | (uint16_t)addrl)];
 #ifdef DEBUG
     printf("memRead: %04x: %02x\r", ADDR, val);
 #endif
