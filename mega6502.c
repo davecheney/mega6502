@@ -3,6 +3,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include "rom.h"
+#include "bigrom.h"
 
 //#define DEBUG true
 
@@ -18,8 +19,7 @@ static void memRead() {
   const uint8_t addrh = PINB;
   const uint8_t addrl = PINA;
   if (addrh & 0x80) {
-    switch (addrh >> 4) {
-    case 0xd:
+    if (addrh == 0xd0) {
       // fake 6821
       switch (addrl) {
       case 0x10:
@@ -37,15 +37,9 @@ static void memRead() {
 #endif
         PORTC = 0;
       }
-      break;
-    case 0xe:
+    } else {
       PORTC = pgm_read_byte(
-          erom + ((((uint16_t)addrh << 8) | (uint16_t)addrl) - 0xe000));
-      break;
-    case 0xf:
-      PORTC = pgm_read_byte(
-          from + ((((uint16_t)addrh << 8) | (uint16_t)addrl) - 0xf000));
-      break;
+          bigrom + ((((uint16_t)addrh << 8) | (uint16_t)addrl) - 0xe000));
     }
   } else {
     PORTC = ram[(((uint16_t)addrh << 8) | (uint16_t)addrl)];
