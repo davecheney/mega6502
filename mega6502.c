@@ -58,11 +58,12 @@ static void memWrite() {
   DDRC = 0x00;
   PORTC = 0;
   const uint8_t addrh = PINB;
-  if (PINB == 0xd0) {
-    if (PINA == 0x12)
+  const uint8_t addrl = PINA;
+  if (addrh == 0xd0) {
+    if (addrl == 0x12)
       putchar(PINC & 0x7f);
   } else {
-    const uint16_t addr = (((uint16_t)addrh << 8) | (uint16_t)PINA);
+    const uint16_t addr = (((uint16_t)addrh << 8) | (uint16_t)addrl);
     ram[addr] = PINC;
 #ifdef DEBUG
     printf("memWrite: %04x: %02x\r", addr, PINC);
