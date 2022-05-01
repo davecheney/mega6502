@@ -1,4 +1,4 @@
-# Mega6502
+# Mega6502 [![Badge License]][License]
 
 *An experimental implementation of a minimal* <br>
 *8 - bit platform using an **Arduino** + **6502** chip.*
@@ -30,3 +30,6 @@ The **65c02** should be connected to the **Arduino** as follows:
 
 <!----------------------------------------------------------------------------->
 
+[Badge License]: https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge
+
+[License]: LICENSE
