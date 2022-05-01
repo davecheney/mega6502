@@ -6,6 +6,6 @@ end_of_line = lf
 insert_final_newline = true
 
 [*.{hpp,cpp,ini,md}]
-indent_style = space
-indent_size = 2
+indent_style = tab
+indent_size = 4
 charset = utf-8

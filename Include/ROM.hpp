@@ -1,3 +1,5 @@
+#ifndef Header_ROM
+#define Header_ROM
 
 #include <Arduino.h>
 
@@ -44,3 +46,5 @@ const uint8_t rom [] PROGMEM = {
 
 };
 
+
+#endif

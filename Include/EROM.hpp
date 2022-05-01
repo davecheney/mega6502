@@ -1,3 +1,6 @@
+#ifndef Header_EROM
+#define Header_EROM
+
 
 #include <Arduino.h>
 
@@ -518,3 +521,6 @@ const uint8_t erom[] PROGMEM = {
     0xe0  , 0x80  , 0xd0  , 0x1   , 0x88  , 0x4c  , 0xc   , 0xe0
 
 };
+
+
+#endif

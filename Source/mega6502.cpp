@@ -1,19 +1,12 @@
 
-// 2400 for the authentic experience, 9600 for something more enjoyable
-
-#define BAUD 2400
-#define CLOCK 53
-#define RESET 52
-#define RW 51
-
+#include "Settings.hpp"
+#include "EROM.hpp"
+#include "FROM.hpp"
+#include "ROM.hpp"
 
 #include <util/setbaud.h>
 #include <avr/pgmspace.h>
 #include <Arduino.h>
-
-#include "EROM.hpp"
-#include "FROM.hpp"
-#include "ROM.hpp"
 
 
 #ifndef cbi
