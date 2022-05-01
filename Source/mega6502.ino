@@ -3,7 +3,10 @@
 // 2400 for the authentic experience, 9600 for something more enjoyable
 #define BAUD 2400
 #include <util/setbaud.h>
-#include "rom.h"
+
+#include "EROM.hpp"
+#include "FROM.hpp"
+#include "ROM.hpp"
 
 #define CLOCK 53
 #define RESET 52
