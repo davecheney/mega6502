@@ -1,10 +1,25 @@
 # Mega6502
 
-Mega6502 is an experiment implementing a minimal 8 bit platform using an Arduino and a 6502.
+*An experimental implementation of a minimal* <br>
+*8 - bit platform using an **Arduino** + **6502** chip.*
 
-# Hardware
+<br>
 
-Mega6502 requires an Ardunio Mega 2560 development board and CMOS 65c02. The 65c02 should be connected to the Arduino as follows
+## Hardware
+
+The **Mega6502** requires:
+
+ **1 x** `Ardunio Mega 2560` development board 
+  
+ **1 x** `CMOS 65c02`
+
+<br>
+
+### Connections
+
+The **65c02** should be connected to the **Arduino** as follows:
+
+<br>
 
 <div align = center>
 
