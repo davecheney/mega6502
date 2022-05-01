@@ -25,13 +25,15 @@ byte pia[0x14];
 
 static uint8_t memRead(){
 
-	const uint8_t addrh = PINC;
-	const uint8_t addrl = PINA;
+	const uint8_t 
+		addrh = PINC,
+		addrl = PINA;
+
 	const uint16_t addr = ADDR;
 
 	uint8_t val;
 	
-	switch (addr >> 12) {
+	switch(addr >> 12){
 	default:
 		// nothing in the address space, just return zero.
 		return 0x00;
@@ -39,8 +41,10 @@ static uint8_t memRead(){
 		val = ram[addr];
 		return val;
 	case 0xd:
+	
 		// fake 6821
-		switch (addrl) {
+	
+		switch(addrl){
 		case 0x10:
 			val = 0x80 | UDR0; 
 			break;
@@ -51,7 +55,7 @@ static uint8_t memRead(){
 			val = UCSR0A & _BV(UDRE0) ? 0x00 : 0xFF;
 			break;
 		default:
-			printf("pia: invalid read at %04x\n", addr);
+			printf("pia: invalid read at %04x\n",addr);
 			val = 0;
 		break;
 		}
@@ -65,6 +69,7 @@ static uint8_t memRead(){
 		return val;
 	}
 }
+
 
 static void memWrite(){
 
@@ -84,15 +89,16 @@ static void memWrite(){
     	break;
     case 0xd:
 		
-		switch (addrl) {
+		switch(addrl){
 		default:
-			printf("pia: invalid write at %04x: %02x\n", addr, val);
+			printf("pia: invalid write at %04x: %02x\n",addr,val);
 		break;
 		case 0x12:
 			putchar(val & 0x7f);
 		break;
 		case 0x11:
 			// ignore write to $D011, PIA is not configurable.
+			break;
 		case 0x13:
 			// ignore write to $D013, PIA is not configurable.
 			break;
@@ -126,16 +132,24 @@ void uart_init(){
         UCSR0A &= ~(_BV(U2X0));
     #endif
 
-    UCSR0C = _BV(UCSZ01) | _BV(UCSZ00); /* 8-bit data */
-    UCSR0B = _BV(RXEN0) | _BV(TXEN0);   /* Enable RX and TX */
-    fdev_setup_stream (&uartout, uart_putchar, NULL, _FDEV_SETUP_WRITE);
-    stdout = &uartout ;
+	// 8-bit data
+
+    UCSR0C = _BV(UCSZ01) | _BV(UCSZ00);
+    
+	// Enable RX and TX
+	
+	UCSR0B = _BV(RXEN0) | _BV(TXEN0);
+
+    fdev_setup_stream(& uartout,uart_putchar,NULL,_FDEV_SETUP_WRITE);
+    
+	stdout = & uartout;
 }
 
 
 void setup(){
 
     uart_init();
+
     printf("RESET\n");
 
     pinMode(CLOCK, OUTPUT);
@@ -176,9 +190,11 @@ void loop(){
     while(true){
 
         cli();
-        cbi(PORTB, 0);
+        cbi(PORTB,0);
         
-        __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t"); // 4 * 62.5ns delay @ 16mhz
+		// 4 * 62.5ns delay @ 16mhz
+
+        __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t"); 
         
         sbi(PORTB, 0);
         sei();
@@ -186,13 +202,15 @@ void loop(){
         if(PINB & _BV(PB2)){
 
             // read cycle
+
             DDRL = 0xff;
             PORTL = memRead();
         
         } else {
         
             // write cycle
-            DDRL = 0x00;
+            
+			DDRL = 0x00;
             PORTL = 0;
             memWrite();
         
